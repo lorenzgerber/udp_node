@@ -17,12 +17,10 @@ int main(int argc, char **argv) {
     int finished = 1;
     int send_socket;
 
-
     if (argc != 4) {
         printWrongParams(argv[0]);
         return EXIT_FAILURE;
     }
-
 
     thisHost = malloc(sizeof(host));
     thisHost->name = getCurrentHostName();
@@ -32,9 +30,6 @@ int main(int argc, char **argv) {
     nextHost = malloc(sizeof(host));
     nextHost->name = argv[2];
     nextHost->port = getIntFromStr(argv[3]);
-
-
-
 
 
     /* Create receiver communication thread */

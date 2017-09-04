@@ -19,7 +19,6 @@ int setup_send_socket(){
 
 struct addrinfo *sender_connect(host *ht, int sock){
 
-	struct sockaddr_in addr;
 	int status;
 	struct addrinfo *res, hints;
 	memset(&hints, 0, sizeof(struct addrinfo));
@@ -27,14 +26,6 @@ struct addrinfo *sender_connect(host *ht, int sock){
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = 0;
 	hints.ai_flags = AI_ADDRCONFIG;
-
-
-	/* Build the network address of this client */
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(0);
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	if (bind(sock, (struct sockaddr *)&addr, sizeof (addr)) != 0)
-		oops("bind");
 
 
 	/* Build the network address of server */
