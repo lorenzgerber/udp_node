@@ -11,21 +11,17 @@
 
 int main(int argc, char **argv) {
     host *hc;
-    if (argc != 3) {
+    if (argc != 2) {
         printWrongParams(argv[0]);
         return EXIT_FAILURE;
     }
 
-    /* Programname need concist of tcp or udp in its name */
-    if(strstr(argv[1], "tcp") == NULL
-      && strstr(argv[1], "udp") == NULL) {
-        printWrongParams(argv[0]);
-        return EXIT_FAILURE;
-    }
+
     hc = malloc(sizeof(host));
     hc->name = getCurrentHostName();
-    hc->port = getIntFromStr(argv[2]);
-    hc->isUDP = (strstr(argv[1], "udp") != NULL) ? 0 : 1;
+    hc->port = getIntFromStr(argv[1]);
+
+
     /* Create receiver communication thread */
     pthread_t listenerThread;
     if (pthread_create(&listenerThread, NULL, &receiver_init, hc) < 0) {
@@ -42,7 +38,7 @@ void printWrongParams(char *progName) {
             "%s\n%s %s\n",
             "Invalid parameters",
             progName,
-            "<[tcp|udp]> <PORT>");
+            "<PORT>");
 }
 /* Will take the given string and return a allocated integer of the
  * string representation.

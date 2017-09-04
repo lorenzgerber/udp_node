@@ -30,7 +30,6 @@
 typedef struct host {
     char *name;
     int *port;
-    int isUDP;
 }host;
 /* Sets up a socket for receiving messages for the program
  * @param arg   hostController of the program.
