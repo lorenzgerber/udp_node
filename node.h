@@ -18,8 +18,9 @@
 #include <string.h>
 #include <unistd.h>
 #include "receiver.h"
-#ifndef __UDPNODE
-#define __UDPNODE
+#include "sender.h"
+#ifndef __NODE
+#define __NODE
 void printWrongParams(char *progName);
 /* Will take the given string and return a allocated integer of the
  * string representation.

@@ -6,6 +6,14 @@
  *
  */
 #include "receiver.h"
+
+
+void cleanup(void* arg){
+
+	((host*) arg)->finished = 0;
+}
+
+
 /* Sets up a socket for receiving messages for the program
  * @param arg   host of the program.
  * @returned    void pointer (needed to end the thread)
@@ -15,6 +23,10 @@ void *receiver_init(void *arg) {
     int sfd, s;
     int yes = 1;
     struct addrinfo hints, *result, *rp;
+
+
+    pthread_cleanup_push(cleanup, ht);
+
     char *listeningPort = calloc(sizeof(char),16);
     sprintf(listeningPort, "%d", *ht->port);
 
@@ -63,6 +75,7 @@ void *receiver_init(void *arg) {
     /* listen-function has stopped, close and free */
     close(sfd);
     free(listeningPort);
+    pthread_cleanup_pop(1);
     return NULL;
 }
 
@@ -118,3 +131,6 @@ void receiver_listenTCP(host *ht, int sfd){
         close(client_sock);
     }
 }
+
+
+

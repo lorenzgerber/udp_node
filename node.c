@@ -14,6 +14,9 @@ int main(int argc, char **argv) {
     host *thisHost;
     host *nextHost;
 
+    int finished = 1;
+    int send_socket;
+
 
     if (argc != 4) {
         printWrongParams(argv[0]);
@@ -24,10 +27,11 @@ int main(int argc, char **argv) {
     thisHost = malloc(sizeof(host));
     thisHost->name = getCurrentHostName();
     thisHost->port = getIntFromStr(argv[1]);
+    thisHost->finished = &finished;
 
     nextHost = malloc(sizeof(host));
-    nextHost->name = argv[3];
-    nextHost->port = getIntFromStr(argv[4]);
+    nextHost->name = argv[2];
+    nextHost->port = getIntFromStr(argv[3]);
 
 
 
@@ -39,6 +43,19 @@ int main(int argc, char **argv) {
         perror("Error creating listener-thread");
         return EXIT_FAILURE;
     }
+
+    struct addrinfo *res;
+
+    send_socket = setup_send_socket(nextHost);
+    res = sender_connect(nextHost, send_socket);
+
+
+    while(thisHost->finished){
+    	send_message(res, send_socket);
+    	sleep(4);
+    	printf("receiver still alive\n");
+    }
+
     pthread_join(listenerThread, NULL);
 
     fprintf(stderr, "Exit-message received, goodbye!\n");
@@ -89,3 +106,5 @@ char* getCurrentHostName() {
     strcpy(host, tmpHost);
     return host;
 }
+
+
