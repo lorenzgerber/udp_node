@@ -10,21 +10,32 @@
 
 
 int main(int argc, char **argv) {
-    host *hc;
-    if (argc != 2) {
+
+    host *thisHost;
+    host *nextHost;
+
+
+    if (argc != 4) {
         printWrongParams(argv[0]);
         return EXIT_FAILURE;
     }
 
 
-    hc = malloc(sizeof(host));
-    hc->name = getCurrentHostName();
-    hc->port = getIntFromStr(argv[1]);
+    thisHost = malloc(sizeof(host));
+    thisHost->name = getCurrentHostName();
+    thisHost->port = getIntFromStr(argv[1]);
+
+    nextHost = malloc(sizeof(host));
+    nextHost->name = argv[3];
+    nextHost->port = getIntFromStr(argv[4]);
+
+
+
 
 
     /* Create receiver communication thread */
     pthread_t listenerThread;
-    if (pthread_create(&listenerThread, NULL, &receiver_init, hc) < 0) {
+    if (pthread_create(&listenerThread, NULL, &receiver_init, thisHost) < 0) {
         perror("Error creating listener-thread");
         return EXIT_FAILURE;
     }
@@ -42,7 +53,7 @@ void printWrongParams(char *progName) {
             "%s\n%s %s\n",
             "Invalid parameters",
             progName,
-            "<PORT>");
+            "<LISTEN_PORT> <SEND_TO_HOST> <SEND_TO_PORT>");
 }
 
 
