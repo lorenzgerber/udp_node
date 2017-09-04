@@ -33,6 +33,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Exit-message received, goodbye!\n");
     return EXIT_SUCCESS;
 }
+
+
+
+
 void printWrongParams(char *progName) {
     fprintf(stderr,
             "%s\n%s %s\n",
@@ -40,6 +44,9 @@ void printWrongParams(char *progName) {
             progName,
             "<PORT>");
 }
+
+
+
 /* Will take the given string and return a allocated integer of the
  * string representation.
  *  @param givenStr The string that will remade to a int.
@@ -56,6 +63,8 @@ int* getIntFromStr(char *givenStr) {
     *fixedInt = p;
     return fixedInt;
 }
+
+
 /* Will allocate a string and set the current hostname.
  * @return  current hostname.
  */
