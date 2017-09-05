@@ -87,12 +87,19 @@ void *receiver_init(void *arg) {
 void receiver_listenTCP(host *ht, int sfd){
 
 	ssize_t nread;
+	char* ourId;
     int bufSize = sizeof(char)*BUF_SIZE;
     struct sockaddr_in client;
     int client_sock;
     int c;
     int exitLoop = 0;
+    int messageType;
     listen(sfd, 3);
+
+    //set our Id
+    char port[5];
+    sprintf(port,"%d", *ht->port);
+    ourId = getCurrentId(port);
 
 
     while(!exitLoop) {
@@ -115,11 +122,16 @@ void receiver_listenTCP(host *ht, int sfd){
 
             // Here have to implement interpreting the incoming message.
             fprintf(stdout, "%s", buf);
-            checkMessageType(buf);
-
-            if(strstr(buf, "EXIT") != NULL){
-                exitLoop = 1;
+            messageType = checkMessageType(buf);
+            if (messageType == 8){
+            	char* messageId = getMessageId(buf, 8);
+            	int result = strcmp(ourId, messageId);
+            	printf("%d\n",result);
             }
+
+
+
+
 
             if(nread == 0){
                 fprintf(stderr, "Receiver - Client disconnected\n");

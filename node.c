@@ -26,17 +26,19 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+    // set host struct of our host
     thisHost = malloc(sizeof(host));
     thisHost->name = getCurrentHostName();
     thisHost->port = getIntFromStr(argv[1]);
     thisHost->finished = &finished;
 
+    // set host struct of send-to host
     nextHost = malloc(sizeof(host));
     nextHost->name = argv[2];
     nextHost->port = getIntFromStr(argv[3]);
 
 
-    /* Create receiver communication thread */
+    // Create receiver communication thread
     pthread_t listenerThread;
     if (pthread_create(&listenerThread, NULL, &receiver_init, thisHost) < 0) {
         perror("Error creating listener-thread");
@@ -60,9 +62,7 @@ int main(int argc, char **argv) {
     // send loop as long as receivcer is alive
     while(thisHost->finished){
 
-
-
-    	send_message(send_socket, res, createContentMessage(argv[1]));
+    	send_message(send_socket, res, createElectionMessage(argv[1]));
     	sleep(2);
     	printf("receiver still alive\n");
     }
@@ -117,6 +117,22 @@ char* getCurrentHostName() {
     strcpy(host, tmpHost);
     return host;
 }
+
+char* getCurrentId(char* sendPort){
+	char tmpHost[255];
+	memset(tmpHost, 0, 255);
+	if (gethostname(tmpHost, 255) != 0) {
+		return 0;
+	}
+	char *host = calloc(strlen(tmpHost)+5, sizeof(char));
+	strcpy(host, tmpHost);
+	char*ptr = host;
+	strcpy(&ptr[strlen(tmpHost)], sendPort);
+	strcpy(&ptr[strlen(tmpHost)+4],"\0");
+
+	return host;
+}
+
 
 
 

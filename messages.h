@@ -20,11 +20,15 @@
 
 int checkMessageType(char* message);
 
+char* getMessageId(char* message, int messateType);
+
 char* createElectionMessage(char* sendPort);
 
 char* createElectionOverMessage(char* sendPort);
 
 char* createContentMessage();
+
+char* getCurrentId(char* sendPort);
 
 
 #endif /* MESSAGES_H_ */

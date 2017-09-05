@@ -21,6 +21,23 @@ int checkMessageType(char* message){
 	return length;
 }
 
+char* getMessageId(char* message, int messageType){
+	int length = 0;
+	char*ptr = message;
+
+	for(int i = messageType+1; i < 100-messageType; i++){
+		if(ptr[i]== '\n'){
+			length = i;
+			break;
+		}
+	}
+
+	char *messageId = calloc(length-(messageType+1), sizeof(char));
+	strncpy(messageId, &ptr[messageType+1], length-(messageType+1));
+
+	return messageId;
+}
+
 char* createElectionMessage(char* sendPort){
 	char tmpHost[100];
 	memset(tmpHost, 0, 100);
