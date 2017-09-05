@@ -10,11 +10,13 @@
 #ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
 #endif
+#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #ifndef MESSAGES_H_
 #define MESSAGES_H_
+
 
 int checkMessageType(char* message);
 

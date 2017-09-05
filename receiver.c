@@ -115,6 +115,7 @@ void receiver_listenTCP(host *ht, int sfd){
 
             // Here have to implement interpreting the incoming message.
             fprintf(stdout, "%s", buf);
+            checkMessageType(buf);
 
             if(strstr(buf, "EXIT") != NULL){
                 exitLoop = 1;

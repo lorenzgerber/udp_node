@@ -7,8 +7,18 @@
 #include "messages.h"
 
 int checkMessageType(char* message){
+	int length = 0;
+	char*ptr = message;
+	for (int i = 0; i < 100; i++){
+		if(ptr[i]== '\n'){
+			length = i;
+			break;
+		}
+	}
 
-	return 0;
+	// currently for debugging
+	printf("length %d\n", length);
+	return length;
 }
 
 char* createElectionMessage(char* sendPort){
@@ -39,9 +49,9 @@ char* createElectionOverMessage(char* sendPort){
 
 	strcpy(message, "ELECTION_OVER\n");
 	char*ptr = message;
-	strcpy(&ptr[9], tmpHost);
-	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
-	strcpy(&ptr[13+strlen(tmpHost)],"\n");
+	strcpy(&ptr[14], tmpHost);
+	strcpy(&ptr[14+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[18+strlen(tmpHost)],"\n");
 
 	return message;
 

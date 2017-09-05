@@ -22,6 +22,7 @@
 #include <netdb.h>
 #include <net/if.h>
 #include <math.h>
+#include "messages.h"
 #define BUF_SIZE 500
 #define NI_MAXHOST 1025
 #define NI_MAXSERV 32

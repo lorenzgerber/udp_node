@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 
 
 
-    	send_message(send_socket, res, createElectionOverMessage(argv[1]));
+    	send_message(send_socket, res, createContentMessage(argv[1]));
     	sleep(2);
     	printf("receiver still alive\n");
     }
