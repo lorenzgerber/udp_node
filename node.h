@@ -18,6 +18,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "receiver.h"
+#include "messages.h"
 #include "sender.h"
 #ifndef __NODE
 #define __NODE
@@ -33,9 +34,5 @@ int* getIntFromStr(char *givenStr);
  */
 char* getCurrentHostName();
 
-char* createElectionMessage(char* sendPort);
 
-char* createElectionOverMessage(char* sendPort);
-
-char* createContentMessage();
 #endif
