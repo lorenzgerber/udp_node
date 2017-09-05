@@ -25,6 +25,7 @@ void *receiver_init(void *arg) {
     struct addrinfo hints, *result, *rp;
 
 
+
     pthread_cleanup_push(cleanup, ht);
 
     char *listeningPort = calloc(sizeof(char),16);
@@ -112,9 +113,10 @@ void receiver_listenTCP(host *ht, int sfd){
             exit(EXIT_FAILURE);
         }
 
+        char *buf = calloc(1, bufSize);
         while (!exitLoop) {
 
-            char *buf = calloc(1, bufSize);
+
             nread = recv(client_sock, buf, bufSize, 0);
             if(nread == -1)
                 continue;
@@ -126,6 +128,10 @@ void receiver_listenTCP(host *ht, int sfd){
             if (messageType == 8){
             	char* messageId = getMessageId(buf, 8);
             	int result = strcmp(ourId, messageId);
+            	if (result < 0){
+            		*ht->sendBuffer = buf;
+            		//printf("<-XXX %s XXXX->", *ht->sendBuffer);
+            	}
             	printf("%d\n",result);
             }
 
@@ -138,8 +144,9 @@ void receiver_listenTCP(host *ht, int sfd){
                 fflush(stderr);
                 break;
             }
-            free(buf);
+
         }
+        free(buf);
         shutdown(client_sock, SHUT_RDWR);
         close(client_sock);
     }

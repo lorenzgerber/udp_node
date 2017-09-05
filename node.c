@@ -14,8 +14,10 @@ int main(int argc, char **argv) {
     host *thisHost;
     host *nextHost;
     struct addrinfo *res;
-    //int election = 0;
+    int election = 0;
     //int mode = 0;
+    char* sendBuffer = (char*) calloc(100, sizeof(char));
+
 
 
     int finished = 1;
@@ -31,6 +33,7 @@ int main(int argc, char **argv) {
     thisHost->name = getCurrentHostName();
     thisHost->port = getIntFromStr(argv[1]);
     thisHost->finished = &finished;
+    thisHost->sendBuffer = &sendBuffer;
 
     // set host struct of send-to host
     nextHost = malloc(sizeof(host));
@@ -50,6 +53,9 @@ int main(int argc, char **argv) {
     send_socket = setup_send_socket();
 
     int connected = -1;
+    election = 1;
+    sendBuffer = createElectionMessage(argv[1]);
+
 
     // try to connect
     while(connected < 0){
@@ -59,10 +65,18 @@ int main(int argc, char **argv) {
     }
 
 
+
+
     // send loop as long as receivcer is alive
     while(thisHost->finished){
 
-    	send_message(send_socket, res, createElectionMessage(argv[1]));
+    	if (election == 1){
+    		send_message(send_socket, res, sendBuffer);
+    	} else {
+    		send_message(send_socket, res, createElectionMessage(argv[1]));
+    	}
+
+
     	sleep(2);
     	printf("receiver still alive\n");
     }
@@ -117,6 +131,7 @@ char* getCurrentHostName() {
     strcpy(host, tmpHost);
     return host;
 }
+
 
 
 

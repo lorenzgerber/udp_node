@@ -29,9 +29,11 @@
 #ifndef __RECEIVER
 #define __RECEIVER
 typedef struct host {
+	char ** sendBuffer;
     char *name;
     int *port;
     int *finished;
+
 }host;
 /* Sets up a socket for receiving messages for the program
  * @param arg   hostController of the program.
