@@ -32,4 +32,10 @@ int* getIntFromStr(char *givenStr);
  * @return  Current hostname
  */
 char* getCurrentHostName();
+
+char* createElectionMessage(char* sendPort);
+
+char* createElectionOverMessage(char* sendPort);
+
+char* createContentMessage();
 #endif

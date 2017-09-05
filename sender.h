@@ -29,7 +29,7 @@ struct addrinfo *get_server_address(host *ht);
 
 int connect_to_server(int sock, host *ht, struct addrinfo *res);
 
-void send_message(int sock, struct addrinfo *res);
+void send_message(int sock, struct addrinfo *res, char* message);
 
 
 #endif /* SENDER_H_ */

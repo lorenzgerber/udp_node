@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
     host *thisHost;
     host *nextHost;
     struct addrinfo *res;
+    int election = 0;
+    int mode = 0;
 
 
     int finished = 1;
@@ -41,11 +43,13 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+    // set up sender
     res = get_server_address(nextHost);
     send_socket = setup_send_socket();
 
     int connected = -1;
 
+    // try to connect
     while(connected < 0){
     	connected = connect_to_server(send_socket, nextHost, res);
     	printf("waiting to get send connection\n");
@@ -53,8 +57,12 @@ int main(int argc, char **argv) {
     }
 
 
+    // send loop as long as receivcer is alive
     while(thisHost->finished){
-    	send_message(send_socket, res);
+
+
+
+    	send_message(send_socket, res, createElectionOverMessage(argv[1]));
     	sleep(2);
     	printf("receiver still alive\n");
     }
@@ -108,6 +116,49 @@ char* getCurrentHostName() {
     char *host = calloc(strlen(tmpHost)+1, sizeof(char));
     strcpy(host, tmpHost);
     return host;
+}
+
+char* createElectionMessage(char* sendPort){
+	char tmpHost[100];
+	memset(tmpHost, 0, 100);
+	if(gethostname(tmpHost, 100) != 0){
+		return 0;
+	}
+	char *message = calloc(100, sizeof(char));
+
+	strcpy(message, "ELECTION\n");
+	char*ptr = message;
+	strcpy(&ptr[9], tmpHost);
+	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[13+strlen(tmpHost)],"\n");
+
+	return message;
+
+}
+
+char* createElectionOverMessage(char* sendPort){
+	char tmpHost[100];
+	memset(tmpHost, 0, 100);
+	if(gethostname(tmpHost, 100) != 0){
+		return 0;
+	}
+	char *message = calloc(100, sizeof(char));
+
+	strcpy(message, "ELECTION_OVER\n");
+	char*ptr = message;
+	strcpy(&ptr[9], tmpHost);
+	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[13+strlen(tmpHost)],"\n");
+
+	return message;
+
+}
+
+char* createContentMessage(){
+	char *message = calloc(100, sizeof(char));
+	strcpy(message, "MESSAGE\nI'm a normal Message\n");
+	return message;
+
 }
 
 
