@@ -13,9 +13,11 @@ int main(int argc, char **argv) {
 
     host *thisHost;
     host *nextHost;
+    struct addrinfo *res;
+
 
     int finished = 1;
-    int send_socket;
+    int send_socket = -1;
 
     if (argc != 4) {
         printWrongParams(argv[0]);
@@ -39,15 +41,21 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    struct addrinfo *res;
+    res = get_server_address(nextHost);
+    send_socket = setup_send_socket();
 
-    send_socket = setup_send_socket(nextHost);
-    res = sender_connect(nextHost, send_socket);
+    int connected = -1;
+
+    while(connected < 0){
+    	connected = connect_to_server(send_socket, nextHost, res);
+    	printf("waiting to get send connection\n");
+    	sleep(2);
+    }
 
 
     while(thisHost->finished){
-    	send_message(res, send_socket);
-    	sleep(4);
+    	send_message(send_socket, res);
+    	sleep(2);
     	printf("receiver still alive\n");
     }
 

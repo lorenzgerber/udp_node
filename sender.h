@@ -22,11 +22,14 @@
 #ifndef SENDER_H_
 #define SENDER_H_
 
+
 int setup_send_socket();
 
-struct addrinfo *sender_connect(host *ht, int sock);
+struct addrinfo *get_server_address(host *ht);
 
-void send_message(struct addrinfo *res, int sock);
+int connect_to_server(int sock, host *ht, struct addrinfo *res);
+
+void send_message(int sock, struct addrinfo *res);
 
 
 #endif /* SENDER_H_ */
