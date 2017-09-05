@@ -145,5 +145,20 @@ void receiver_listenTCP(host *ht, int sfd){
     }
 }
 
+char* getCurrentId(char* sendPort){
+	char tmpHost[255];
+	memset(tmpHost, 0, 255);
+	if (gethostname(tmpHost, 255) != 0) {
+		return 0;
+	}
+	char *host = calloc(strlen(tmpHost)+5, sizeof(char));
+	strcpy(host, tmpHost);
+	char*ptr = host;
+	strcpy(&ptr[strlen(tmpHost)], sendPort);
+	strcpy(&ptr[strlen(tmpHost)+4],"\0");
+
+	return host;
+}
+
 
 

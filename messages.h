@@ -28,7 +28,7 @@ char* createElectionOverMessage(char* sendPort);
 
 char* createContentMessage();
 
-char* getCurrentId(char* sendPort);
+
 
 
 #endif /* MESSAGES_H_ */

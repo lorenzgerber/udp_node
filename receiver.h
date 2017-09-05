@@ -48,4 +48,8 @@ void receiver_listenUDP(host *ht, int sfd);
  * @param   sfd     The socket it will receive data to.
  */
 void receiver_listenTCP(host *ht, int sfd);
+
+
+char* getCurrentId(char* sendPort);
+
 #endif

@@ -34,5 +34,7 @@ int* getIntFromStr(char *givenStr);
  */
 char* getCurrentHostName();
 
+char* getCurrentId(char* sendPort);
+
 
 #endif

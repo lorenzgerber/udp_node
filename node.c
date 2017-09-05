@@ -14,8 +14,8 @@ int main(int argc, char **argv) {
     host *thisHost;
     host *nextHost;
     struct addrinfo *res;
-    int election = 0;
-    int mode = 0;
+    //int election = 0;
+    //int mode = 0;
 
 
     int finished = 1;
@@ -118,20 +118,7 @@ char* getCurrentHostName() {
     return host;
 }
 
-char* getCurrentId(char* sendPort){
-	char tmpHost[255];
-	memset(tmpHost, 0, 255);
-	if (gethostname(tmpHost, 255) != 0) {
-		return 0;
-	}
-	char *host = calloc(strlen(tmpHost)+5, sizeof(char));
-	strcpy(host, tmpHost);
-	char*ptr = host;
-	strcpy(&ptr[strlen(tmpHost)], sendPort);
-	strcpy(&ptr[strlen(tmpHost)+4],"\0");
 
-	return host;
-}
 
 
 
