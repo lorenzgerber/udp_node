@@ -7,6 +7,7 @@
  */
  
 #include "node.h"
+pthread_mutex_t mtx_lock;
 
 
 int main(int argc, char **argv) {
@@ -14,19 +15,26 @@ int main(int argc, char **argv) {
     host *thisHost;
     host *nextHost;
     struct addrinfo *res;
-    int election = 0;
-    //int mode = 0;
     char* sendBuffer = (char*) calloc(100, sizeof(char));
+    int election = 0;
 
+
+    // variables to synchronize read/send of messages
+    int noMessageValue = 0;
+    int *gotMessage = &noMessageValue;
 
 
     int finished = 1;
     int send_socket = -1;
 
+
     if (argc != 4) {
         printWrongParams(argv[0]);
         return EXIT_FAILURE;
     }
+
+    // initialize lock
+    pthread_mutex_init(&mtx_lock, NULL);
 
     // set host struct of our host
     thisHost = malloc(sizeof(host));
@@ -34,6 +42,7 @@ int main(int argc, char **argv) {
     thisHost->port = getIntFromStr(argv[1]);
     thisHost->finished = &finished;
     thisHost->sendBuffer = &sendBuffer;
+    thisHost->gotMessage = &gotMessage;
 
     // set host struct of send-to host
     nextHost = malloc(sizeof(host));
@@ -64,16 +73,34 @@ int main(int argc, char **argv) {
     	sleep(2);
     }
 
+    // send first message
+    send_message(send_socket, res, createElectionMessage(argv[1]));
+
+
+
 
 
 
     // send loop as long as receivcer is alive
     while(thisHost->finished){
 
-    	if (election == 1){
-    		send_message(send_socket, res, sendBuffer);
+    	// only send new message when you got one
+    	if(*gotMessage == 1){
+
+    		pthread_mutex_lock(&mtx_lock);
+    		gotMessage = &noMessageValue;
+    		pthread_mutex_unlock(&mtx_lock);
+
+			if (election == 1){
+				send_message(send_socket, res, sendBuffer);
+			} else if (election == 2){
+				send_message(send_socket, res, createElectionOverMessage(argv[1]));
+			}
+
+
+
     	} else {
-    		send_message(send_socket, res, createElectionMessage(argv[1]));
+    		printf("there was no new message\n");
     	}
 
 

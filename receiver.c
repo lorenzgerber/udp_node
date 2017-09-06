@@ -95,6 +95,10 @@ void receiver_listenTCP(host *ht, int sfd){
     int c;
     int exitLoop = 0;
     int messageType;
+
+    int newMessageValue = 1;
+
+
     listen(sfd, 3);
 
     //set our Id
@@ -117,33 +121,40 @@ void receiver_listenTCP(host *ht, int sfd){
         while (!exitLoop) {
 
 
+
             nread = recv(client_sock, buf, bufSize, 0);
             if(nread == -1)
                 continue;
 
-
-            // Here have to implement interpreting the incoming message.
-            fprintf(stdout, "%s", buf);
-            messageType = checkMessageType(buf);
-            if (messageType == 8){
-            	char* messageId = getMessageId(buf, 8);
-            	int result = strcmp(ourId, messageId);
-            	if (result < 0){
-            		*ht->sendBuffer = buf;
-            		//printf("<-XXX %s XXXX->", *ht->sendBuffer);
-            	}
-            	printf("%d\n",result);
-            }
-
-
-
-
-
             if(nread == 0){
                 fprintf(stderr, "Receiver - Client disconnected\n");
                 fflush(stderr);
+                exitLoop=1;
                 break;
             }
+
+
+            // Here have to implement interpreting the incoming message.
+            messageType = checkMessageType(buf);
+            if (messageType == 8){
+            	char* messageId = getMessageId(buf, 8);
+
+            	int result = strcmp(ourId, messageId);
+            	if (result == 0){
+            		printf("we are the Elected!\n");
+            	}
+            	if (result < 0){
+            		*ht->sendBuffer = buf;
+            	}
+            }
+
+            pthread_mutex_lock(&mtx_lock);
+            *ht->gotMessage = &newMessageValue;
+            pthread_mutex_unlock(&mtx_lock);
+
+
+            printf("%s", buf);
+
 
         }
         free(buf);

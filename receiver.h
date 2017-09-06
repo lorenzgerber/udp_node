@@ -28,13 +28,19 @@
 #define NI_MAXSERV 32
 #ifndef __RECEIVER
 #define __RECEIVER
+
+// data transfer struct
 typedef struct host {
 	char ** sendBuffer;
     char *name;
     int *port;
     int *finished;
-
+    int **gotMessage;
 }host;
+
+// global mutex lock
+extern pthread_mutex_t mtx_lock;
+
 /* Sets up a socket for receiving messages for the program
  * @param arg   hostController of the program.
  * @returned    void pointer (needed to end the thread)
