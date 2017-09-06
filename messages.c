@@ -38,24 +38,25 @@ char* getMessageId(char* message, int messageType){
 	return messageId;
 }
 
-char* createElectionMessage(char* sendPort){
-	char tmpHost[100];
-	memset(tmpHost, 0, 100);
-	if(gethostname(tmpHost, 100) != 0){
-		return 0;
-	}
-	char *message = calloc(100, sizeof(char));
-
-	strcpy(message, "ELECTION\n");
+int getMessageId2(char* message, int messageType, char** messageId){
+	int length = 0;
 	char*ptr = message;
-	strcpy(&ptr[9], tmpHost);
-	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
-	strcpy(&ptr[13+strlen(tmpHost)],"\n");
 
-	return message;
+	for(int i = messageType+1; i < 100-messageType; i++){
+		if(ptr[i]== '\n'){
+			length = i;
+			break;
+		}
+	}
+
+	memcpy(*messageId, &ptr[messageType+1], length-(messageType+1));
+	return 0;
 }
 
-int createElectionMessage2(char* sendPort, char** sendBuf){
+
+
+
+int createElectionMessage(char* sendPort, char** sendBuf){
 	char tmpHost[100];
 	memset(tmpHost, 0, 100);
 	if(gethostname(tmpHost, 100) != 0){
@@ -75,7 +76,8 @@ int createElectionMessage2(char* sendPort, char** sendBuf){
 	return 0;
 }
 
-char* createElectionOverMessage(char* sendPort){
+
+int createElectionOverMessage(char* sendPort, char**sendBuf){
 	char tmpHost[100];
 
 	if(gethostname(tmpHost, 100) != 0){
@@ -87,15 +89,23 @@ char* createElectionOverMessage(char* sendPort){
 	char*ptr = message;
 	strcpy(&ptr[14], tmpHost);
 	strcpy(&ptr[14+strlen(tmpHost)], sendPort);
-	//strcpy(&ptr[18+strlen(tmpHost)],"\n");
+	memcpy(*sendBuf, message, 100);
+	free(message);
 
-	return message;
-
+	return 0;
 }
 
-char* createContentMessage(){
+int copyReceiveToSend(char** receiveBuf, char** sendBuf){
+	memcpy(*sendBuf, *receiveBuf,100);
+	return 0;
+}
+
+
+int createContentMessage(char** sendBuf){
 	char *message = calloc(100, sizeof(char));
 	strcpy(message, "MESSAGE\nI'm a normal Message\n");
-	return message;
+	memcpy(*sendBuf, message, 100);
+	free(message);
 
+	return 0;
 }
