@@ -95,8 +95,18 @@ void receiver_listenTCP(host *ht, int sfd){
     int c;
     int exitLoop = 0;
     int messageType;
-
     int newMessageValue = 1;
+
+    int election = 1;
+	int electionOver = 2;
+	int master = 3;
+	int slave = 4;
+
+	// timing
+	int statCounter = 0;
+	clock_t begin;
+	clock_t end;
+	double timeSpent;
 
 
     listen(sfd, 3);
@@ -118,7 +128,10 @@ void receiver_listenTCP(host *ht, int sfd){
         }
 
         char *buf = calloc(1, bufSize);
+
+
         while (!exitLoop) {
+
 
 
 
@@ -136,24 +149,78 @@ void receiver_listenTCP(host *ht, int sfd){
 
             // Here have to implement interpreting the incoming message.
             messageType = checkMessageType(buf);
-            if (messageType == 8){
-            	char* messageId = getMessageId(buf, 8);
 
-            	int result = strcmp(ourId, messageId);
-            	if (result == 0){
-            		printf("we are the Elected!\n");
+
+            if(**ht->mode == election){
+            	if (messageType == 8){
+					char* messageId = getMessageId(buf, 8);
+
+					int result = strcmp(ourId, messageId);
+					if (result == 0){
+						printf("we are the Elected!\n");
+						*ht->mode = &electionOver;
+					}
+					if (result < 0){
+						*ht->sendBuffer = buf;
+					}
+				} else if(messageType == 13){
+					*ht->mode = &slave;
+					printf("we are the slave\n");
+					*ht->sendBuffer = buf;
+				}
+
+				pthread_mutex_lock(&mtx_lock);
+				*ht->gotMessage = &newMessageValue;
+				pthread_mutex_unlock(&mtx_lock);
+
+            } else if(**ht->mode == electionOver){
+            	if(messageType == 13){
+            		//printf("election is over and we got a message\n");
+            		*ht->sendBuffer = createContentMessage();
+            		*ht->mode = &master;
+
+
+            		pthread_mutex_lock(&mtx_lock);
+            		*ht->gotMessage = &newMessageValue;
+            		pthread_mutex_unlock(&mtx_lock);
             	}
-            	if (result < 0){
-            		*ht->sendBuffer = buf;
+            } else if (**ht->mode == slave){
+            	if(messageType == 7){
+            		free(*ht->sendBuffer);
+            		*ht->sendBuffer = createContentMessage();
+
+            		pthread_mutex_lock(&mtx_lock);
+					*ht->gotMessage = &newMessageValue;
+					pthread_mutex_unlock(&mtx_lock);
             	}
+            } else if (**ht->mode == master){
+            	if(messageType == 7){
+					free(*ht->sendBuffer);
+					*ht->sendBuffer = createContentMessage();
+
+					pthread_mutex_lock(&mtx_lock);
+					*ht->gotMessage = &newMessageValue;
+					pthread_mutex_unlock(&mtx_lock);
+
+					if (statCounter == 0){
+						begin = clock();
+						statCounter++;
+					} else if (statCounter == 10000){
+						end = clock();
+						timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+						printf("time per 10000 RT's %f\n", timeSpent);
+						statCounter = 0;
+					} else {
+						statCounter++;
+					}
+
+				}
+
             }
 
-            pthread_mutex_lock(&mtx_lock);
-            *ht->gotMessage = &newMessageValue;
-            pthread_mutex_unlock(&mtx_lock);
 
 
-            printf("%s", buf);
+            //printf("%s", buf);
 
 
         }

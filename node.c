@@ -16,12 +16,19 @@ int main(int argc, char **argv) {
     host *nextHost;
     struct addrinfo *res;
     char* sendBuffer = (char*) calloc(100, sizeof(char));
-    int election = 0;
 
+
+    int election = 1;
+    int electionOver = 2;
+    int master = 3;
+    int slave = 4;
+    int *mode = &election;
 
     // variables to synchronize read/send of messages
-    int noMessageValue = 0;
-    int *gotMessage = &noMessageValue;
+    int noMessage = 0;
+    int newMessage = 1;
+    int *gotMessage = &noMessage;
+
 
 
     int finished = 1;
@@ -43,6 +50,7 @@ int main(int argc, char **argv) {
     thisHost->finished = &finished;
     thisHost->sendBuffer = &sendBuffer;
     thisHost->gotMessage = &gotMessage;
+    thisHost->mode = &mode;
 
     // set host struct of send-to host
     nextHost = malloc(sizeof(host));
@@ -81,31 +89,34 @@ int main(int argc, char **argv) {
 
 
 
-    // send loop as long as receivcer is alive
+    // send loop as long as receiver is alive
     while(thisHost->finished){
 
     	// only send new message when you got one
-    	if(*gotMessage == 1){
+    	if(*gotMessage == newMessage){
 
-    		pthread_mutex_lock(&mtx_lock);
-    		gotMessage = &noMessageValue;
-    		pthread_mutex_unlock(&mtx_lock);
 
-			if (election == 1){
+
+			if (*mode == 1){
 				send_message(send_socket, res, sendBuffer);
-			} else if (election == 2){
+			} else if (*mode == 2){
 				send_message(send_socket, res, createElectionOverMessage(argv[1]));
+			} else if (*mode == 3 || *mode == 4){
+				send_message(send_socket, res, sendBuffer);
 			}
 
 
+			pthread_mutex_lock(&mtx_lock);
+			gotMessage = &noMessage;
+			pthread_mutex_unlock(&mtx_lock);
+
 
     	} else {
-    		printf("there was no new message\n");
+    		//printf("no new message or different mode\n");
     	}
 
-
-    	sleep(2);
-    	printf("receiver still alive\n");
+    	//sleep(2);
+    	//printf("receiver still alive\n");
     }
 
     pthread_join(listenerThread, NULL);

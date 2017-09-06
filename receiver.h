@@ -23,7 +23,7 @@
 #include <net/if.h>
 #include <math.h>
 #include "messages.h"
-#define BUF_SIZE 500
+#define BUF_SIZE 100
 #define NI_MAXHOST 1025
 #define NI_MAXSERV 32
 #ifndef __RECEIVER
@@ -36,6 +36,7 @@ typedef struct host {
     int *port;
     int *finished;
     int **gotMessage;
+    int **mode;
 }host;
 
 // global mutex lock

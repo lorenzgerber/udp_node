@@ -17,7 +17,7 @@ int checkMessageType(char* message){
 	}
 
 	// currently for debugging
-	printf("length %d\n", length);
+	//printf("length %d\n", length);
 	return length;
 }
 
@@ -58,7 +58,7 @@ char* createElectionMessage(char* sendPort){
 
 char* createElectionOverMessage(char* sendPort){
 	char tmpHost[100];
-	memset(tmpHost, 0, 100);
+
 	if(gethostname(tmpHost, 100) != 0){
 		return 0;
 	}
@@ -68,7 +68,7 @@ char* createElectionOverMessage(char* sendPort){
 	char*ptr = message;
 	strcpy(&ptr[14], tmpHost);
 	strcpy(&ptr[14+strlen(tmpHost)], sendPort);
-	strcpy(&ptr[18+strlen(tmpHost)],"\n");
+	//strcpy(&ptr[18+strlen(tmpHost)],"\n");
 
 	return message;
 
