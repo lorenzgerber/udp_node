@@ -70,8 +70,8 @@ int main(int argc, char **argv) {
     send_socket = setup_send_socket();
 
     int connected = -1;
-    //sendBuffer = createElectionMessage2(argv[1], &sendBuffer);
-    sendBuffer = createElectionMessage(argv[1]);
+    createElectionMessage2(argv[1], &sendBuffer);
+    //sendBuffer = createElectionMessage(argv[1]);
 
 
     // try to connect

@@ -55,7 +55,7 @@ char* createElectionMessage(char* sendPort){
 	return message;
 }
 
-char* createElectionMessage2(char* sendPort, char** sendBuf){
+int createElectionMessage2(char* sendPort, char** sendBuf){
 	char tmpHost[100];
 	memset(tmpHost, 0, 100);
 	if(gethostname(tmpHost, 100) != 0){
@@ -72,7 +72,7 @@ char* createElectionMessage2(char* sendPort, char** sendBuf){
 	memcpy(*sendBuf, message, 100);
 	free(message);
 
-	return message;
+	return 0;
 }
 
 char* createElectionOverMessage(char* sendPort){
