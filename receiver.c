@@ -98,7 +98,7 @@ void receiver_listenTCP(host *ht, int sfd){
     char * messageId = (char*) calloc(100, sizeof(char));
 
     int messageType;
-    int newMessageValue = 1;
+    int newMessage = 1;
 
     int election = 1;
 	int electionOver = 2;
@@ -134,6 +134,15 @@ void receiver_listenTCP(host *ht, int sfd){
 
 
         while (!exitLoop) {
+
+        	int waitSend = 1;
+        	while (waitSend){
+        		if(**ht->gotMessage != newMessage){
+        			waitSend = 0;
+        		}
+        	}
+        	waitSend = 1;
+
 
             nread = recv(client_sock, receiveBuffer, bufSize, 0);
             if(nread == -1)
@@ -172,7 +181,7 @@ void receiver_listenTCP(host *ht, int sfd){
 					copyReceiveToSend(&receiveBuffer, ht->sendBuffer);
 
 				}
-				*ht->gotMessage = &newMessageValue;
+				*ht->gotMessage = &newMessage;
 
 
             } else if(**ht->mode == electionOver){
@@ -181,7 +190,7 @@ void receiver_listenTCP(host *ht, int sfd){
             		*ht->mode = &master;
 
             		pthread_mutex_lock(&mtx_lock);
-            		*ht->gotMessage = &newMessageValue;
+            		*ht->gotMessage = &newMessage;
             		pthread_mutex_unlock(&mtx_lock);
             	}
             } else if (**ht->mode == slave){
@@ -189,7 +198,7 @@ void receiver_listenTCP(host *ht, int sfd){
             		createContentMessage(&*ht->sendBuffer);
 
             		pthread_mutex_lock(&mtx_lock);
-					*ht->gotMessage = &newMessageValue;
+					*ht->gotMessage = &newMessage;
 					pthread_mutex_unlock(&mtx_lock);
 
             	}
@@ -198,7 +207,7 @@ void receiver_listenTCP(host *ht, int sfd){
 					createContentMessage(&*ht->sendBuffer);
 
 					pthread_mutex_lock(&mtx_lock);
-					*ht->gotMessage = &newMessageValue;
+					*ht->gotMessage = &newMessage;
 					pthread_mutex_unlock(&mtx_lock);
 
 
