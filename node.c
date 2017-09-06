@@ -9,12 +9,13 @@
 #include "node.h"
 pthread_mutex_t mtx_lock;
 
-
 int main(int argc, char **argv) {
 
     host *thisHost;
     host *nextHost;
     struct addrinfo *res;
+
+    // one time allocation
     char* sendBuffer = (char*) calloc(100, sizeof(char));
 
 
@@ -70,8 +71,8 @@ int main(int argc, char **argv) {
     send_socket = setup_send_socket();
 
     int connected = -1;
-    createElectionMessage2(argv[1], &sendBuffer);
-    //sendBuffer = createElectionMessage(argv[1]);
+    createElectionMessage(argv[1], &sendBuffer);
+
 
 
     // try to connect
@@ -82,7 +83,7 @@ int main(int argc, char **argv) {
     }
 
     // send first message
-    send_message(send_socket, res, createElectionMessage(argv[1]));
+    send_message(send_socket, res, sendBuffer);
 
 
 
@@ -90,13 +91,15 @@ int main(int argc, char **argv) {
     // send loop as long as receiver is alive
     while(thisHost->finished){
 
+
     	// only send new message when you got one
     	if(*gotMessage == newMessage){
 
 			if (*mode == election){
 				send_message(send_socket, res, sendBuffer);
 			} else if (*mode == electionOver){
-				send_message(send_socket, res, createElectionOverMessage(argv[1]));
+				createElectionOverMessage(argv[1], &sendBuffer);
+				send_message(send_socket, res, sendBuffer);
 			} else if (*mode == master || *mode == slave){
 				send_message(send_socket, res, sendBuffer);
 			}
@@ -116,7 +119,6 @@ int main(int argc, char **argv) {
 
 
 
-
 void printWrongParams(char *progName) {
     fprintf(stderr,
             "%s\n%s %s\n",
@@ -124,7 +126,6 @@ void printWrongParams(char *progName) {
             progName,
             "<LISTEN_PORT> <SEND_TO_HOST> <SEND_TO_PORT>");
 }
-
 
 
 /* Will take the given string and return a allocated integer of the
