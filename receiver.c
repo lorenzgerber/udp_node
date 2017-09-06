@@ -132,12 +132,10 @@ void receiver_listenTCP(host *ht, int sfd){
 
         while (!exitLoop) {
 
-
-
-
             nread = recv(client_sock, buf, bufSize, 0);
             if(nread == -1)
                 continue;
+
 
             if(nread == 0){
                 fprintf(stderr, "Receiver - Client disconnected\n");
@@ -149,7 +147,6 @@ void receiver_listenTCP(host *ht, int sfd){
 
             // Here have to implement interpreting the incoming message.
             messageType = checkMessageType(buf);
-
 
             if(**ht->mode == election){
             	if (messageType == 8){
@@ -192,15 +189,20 @@ void receiver_listenTCP(host *ht, int sfd){
             		pthread_mutex_lock(&mtx_lock);
 					*ht->gotMessage = &newMessageValue;
 					pthread_mutex_unlock(&mtx_lock);
+
             	}
             } else if (**ht->mode == master){
             	if(messageType == 7){
 					free(*ht->sendBuffer);
 					*ht->sendBuffer = createContentMessage();
 
-					pthread_mutex_lock(&mtx_lock);
+					if(pthread_mutex_lock(&mtx_lock)<0)
+						perror("mutex lock");
+
 					*ht->gotMessage = &newMessageValue;
-					pthread_mutex_unlock(&mtx_lock);
+
+					if(pthread_mutex_unlock(&mtx_lock)<0)
+						perror("mutex unlock");
 
 					if (statCounter == 0){
 						begin = clock();
@@ -213,15 +215,8 @@ void receiver_listenTCP(host *ht, int sfd){
 					} else {
 						statCounter++;
 					}
-
 				}
-
             }
-
-
-
-            //printf("%s", buf);
-
 
         }
         free(buf);

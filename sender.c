@@ -51,9 +51,8 @@ void send_message(int sock, struct addrinfo *res, char* message){
 	char buf[BUFSIZE];
 	memset(buf, 0, 100);
 	sprintf(buf, "%s\n", message);
-
-	sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)res->ai_addr, res->ai_addrlen);
-
+	if(sendto(sock, buf, strlen(buf), 0, (struct sockaddr *)res->ai_addr, res->ai_addrlen)<0)
+		perror("sendto");
 }
 
 

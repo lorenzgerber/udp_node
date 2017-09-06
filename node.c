@@ -70,7 +70,6 @@ int main(int argc, char **argv) {
     send_socket = setup_send_socket();
 
     int connected = -1;
-    election = 1;
     sendBuffer = createElectionMessage(argv[1]);
 
 
@@ -87,36 +86,25 @@ int main(int argc, char **argv) {
 
 
 
-
-
     // send loop as long as receiver is alive
     while(thisHost->finished){
 
     	// only send new message when you got one
     	if(*gotMessage == newMessage){
 
-
-
-			if (*mode == 1){
+			if (*mode == election){
 				send_message(send_socket, res, sendBuffer);
-			} else if (*mode == 2){
+			} else if (*mode == electionOver){
 				send_message(send_socket, res, createElectionOverMessage(argv[1]));
-			} else if (*mode == 3 || *mode == 4){
+			} else if (*mode == master || *mode == slave){
 				send_message(send_socket, res, sendBuffer);
 			}
-
 
 			pthread_mutex_lock(&mtx_lock);
 			gotMessage = &noMessage;
 			pthread_mutex_unlock(&mtx_lock);
 
-
-    	} else {
-    		//printf("no new message or different mode\n");
     	}
-
-    	//sleep(2);
-    	//printf("receiver still alive\n");
     }
 
     pthread_join(listenerThread, NULL);
