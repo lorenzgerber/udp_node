@@ -53,7 +53,26 @@ char* createElectionMessage(char* sendPort){
 	strcpy(&ptr[13+strlen(tmpHost)],"\n");
 
 	return message;
+}
 
+char* createElectionMessage2(char* sendPort, char** sendBuf){
+	char tmpHost[100];
+	memset(tmpHost, 0, 100);
+	if(gethostname(tmpHost, 100) != 0){
+		return 0;
+	}
+	char *message = calloc(100, sizeof(char));
+
+	strcpy(message, "ELECTION\n");
+	char*ptr = message;
+	strcpy(&ptr[9], tmpHost);
+	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[13+strlen(tmpHost)],"\n");
+
+	memcpy(*sendBuf, message, 100);
+	free(message);
+
+	return message;
 }
 
 char* createElectionOverMessage(char* sendPort){

@@ -23,6 +23,7 @@ int checkMessageType(char* message);
 char* getMessageId(char* message, int messateType);
 
 char* createElectionMessage(char* sendPort);
+char* createElectionMessage2(char* sendPort, char** sendBuff);
 
 char* createElectionOverMessage(char* sendPort);
 
