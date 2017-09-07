@@ -4,8 +4,8 @@ CFLAGS= -Wall -std=c99 -Werror -g -pthread
 
 all: node
 
-node: node.c receiver.c sender.c messages.c election.c receiver.h node.h sender.h messages.h election.h
-	$(CC) $(CFLAGS) -o node node.c receiver.c sender.c messages.c election.c
+node: node.c receiver.c sender.c messages.c election.c helper.c receiver.h node.h sender.h messages.h election.h helper.h
+	$(CC) $(CFLAGS) -o node node.c receiver.c sender.c messages.c election.c helper.c
 	
 clean:
 	rm node

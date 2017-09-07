@@ -33,7 +33,6 @@ void *receiver_init(void *arg) {
     int yes = 1;
     struct addrinfo hints, *result, *rp;
 
-
     pthread_cleanup_push(cleanup, ht);
 
     char *listeningPort = calloc(sizeof(char),16);
@@ -80,14 +79,12 @@ void *receiver_init(void *arg) {
     receiver_listenTCP(ht, sfd);
     shutdown(sfd, SHUT_RDWR);
 
-
     /* listen-function has stopped, close and free */
     close(sfd);
     free(listeningPort);
     pthread_cleanup_pop(1);
     return NULL;
 }
-
 
 /* Will receive and save messages to the hostControll, uses protocol TCP.
  * @param   ht  The host of the program.
@@ -115,7 +112,6 @@ void receiver_listenTCP(dataContainer *ht, int sfd){
     char port[5];
     sprintf(port,"%d", *(*ht->host)->port);
     ourId = getCurrentId(port);
-
 
     while(!exitLoop) {
 
@@ -178,21 +174,6 @@ void receiver_listenTCP(dataContainer *ht, int sfd){
         shutdown(client_sock, SHUT_RDWR);
         close(client_sock);
     }
-}
-
-char* getCurrentId(char* sendPort){
-	char tmpHost[255];
-	memset(tmpHost, 0, 255);
-	if (gethostname(tmpHost, 255) != 0) {
-		return 0;
-	}
-	char *host = calloc(strlen(tmpHost)+5, sizeof(char));
-	strcpy(host, tmpHost);
-	char*ptr = host;
-	strcpy(&ptr[strlen(tmpHost)], sendPort);
-	strcpy(&ptr[strlen(tmpHost)+4],"\0");
-
-	return host;
 }
 
 

@@ -24,6 +24,7 @@
 #include <math.h>
 #include "messages.h"
 #include "election.h"
+#include "helper.h"
 #define BUF_SIZE 100
 #define NI_MAXHOST 1025
 #define NI_MAXSERV 32

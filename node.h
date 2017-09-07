@@ -21,6 +21,7 @@
 #include "receiver.h"
 #include "messages.h"
 #include "sender.h"
+#include "helper.h"
 #ifndef __NODE
 #define __NODE
 
