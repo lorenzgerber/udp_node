@@ -30,15 +30,18 @@
 #ifndef __RECEIVER
 #define __RECEIVER
 
-// data transfer struct
 typedef struct host {
-	char ** sendBuffer;
-    char *name;
-    int *port;
-    int *finished;
-    int **gotMessage;
-    int **mode;
+	char *name;
+	int *port;
 }host;
+
+typedef struct dataContainer {
+	host ** host;
+	char ** sendBuffer;
+	int *finished;
+	int **gotMessage;
+	int **mode;
+}dataContainer;
 
 // global mutex lock
 extern pthread_mutex_t mtx_lock;
@@ -57,7 +60,7 @@ void receiver_listenUDP(host *ht, int sfd);
  * @param   ht      The host of the program
  * @param   sfd     The socket it will receive data to.
  */
-void receiver_listenTCP(host *ht, int sfd);
+void receiver_listenTCP(dataContainer *ht, int sfd);
 
 
 char* getCurrentId(char* sendPort);

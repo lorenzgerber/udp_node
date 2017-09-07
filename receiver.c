@@ -19,7 +19,7 @@
 
 void cleanup(void* arg){
 
-	((host*) arg)->finished = 0;
+	((dataContainer*) arg)->finished = 0;
 }
 
 
@@ -28,7 +28,7 @@ void cleanup(void* arg){
  * @returned    void pointer (needed to end the thread)
  */
 void *receiver_init(void *arg) {
-    host *ht = (host*)arg;
+    dataContainer *ht = (dataContainer*)arg;
     int sfd, s;
     int yes = 1;
     struct addrinfo hints, *result, *rp;
@@ -37,7 +37,7 @@ void *receiver_init(void *arg) {
     pthread_cleanup_push(cleanup, ht);
 
     char *listeningPort = calloc(sizeof(char),16);
-    sprintf(listeningPort, "%d", *ht->port);
+    sprintf(listeningPort, "%d", *(*ht->host)->port);
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_socktype = SOCK_STREAM;
@@ -93,7 +93,7 @@ void *receiver_init(void *arg) {
  * @param   ht  The host of the program.
  * @param   sfd The socket it will receive data to.
  */
-void receiver_listenTCP(host *ht, int sfd){
+void receiver_listenTCP(dataContainer *ht, int sfd){
 
 	ssize_t nread;
 	char* ourId;
@@ -113,7 +113,7 @@ void receiver_listenTCP(host *ht, int sfd){
 
     //set our Id
     char port[5];
-    sprintf(port,"%d", *ht->port);
+    sprintf(port,"%d", *(*ht->host)->port);
     ourId = getCurrentId(port);
 
 

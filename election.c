@@ -17,48 +17,56 @@
 
 int processMessage(char* ourId, char** receiveBuf, char** sendBuf, int** mode, char*port){
 
-
-
 	int messageType;
 	char * messageId = (char*) calloc(100, sizeof(char));
-
-
 	messageType = checkMessageType(*receiveBuf);
 
-	if(**mode == MODE_ELECTION){
-		if (messageType == MSG_ELECTION){
-			getMessageId(*receiveBuf, 8, &messageId);
-			int result = strcmp(ourId, messageId);
-			free(messageId);
 
-			if (result == 0){
-				printf("we are the Elected!\n");
-				**mode = MODE_ELECTION_OVER;
-				createElectionOverMessage(port, &*sendBuf);
-			}
-			if (result < 0){
-				copyReceiveToSend(receiveBuf, &*sendBuf);
-			}
-		} else if(messageType == MSG_ELECTION_OVER){
-			**mode = MODE_SLAVE;
-
-			printf("we are the slave\n");
-			copyReceiveToSend(receiveBuf, &*sendBuf);
-		}
-
-	} else if(**mode == MODE_ELECTION_OVER){
+	switch (**mode){
+	case MODE_ELECTION:
+		election(ourId, mode, messageType, messageId,receiveBuf, sendBuf, port);
+		break;
+	case MODE_ELECTION_OVER:
 		if(messageType == MSG_ELECTION_OVER){
 			createContentMessage(sendBuf);
 			**mode = MODE_MASTER;
 		}
-	} else if (**mode == MODE_SLAVE){
+		break;
+	case MODE_SLAVE:
 		if(messageType == MSG_CONTENT){
 			createContentMessage(&*sendBuf);
 		}
-	} else if (**mode == MODE_MASTER){
+		break;
+	case MODE_MASTER:
 		if(messageType == MSG_CONTENT){
 			createContentMessage(&*sendBuf);
 		}
+	}
+
+	return 0;
+}
+
+
+
+int election(char* ourId, int** mode, int messageType, char* messageId, char** receiveBuf, char** sendBuf, char* port){
+	if (messageType == MSG_ELECTION){
+		getMessageId(*receiveBuf, 8, &messageId);
+		int result = strcmp(ourId, messageId);
+		free(messageId);
+
+		if (result == 0){
+			printf("we are the Elected!\n");
+			**mode = MODE_ELECTION_OVER;
+			createElectionOverMessage(port, &*sendBuf);
+		}
+		if (result < 0){
+			copyReceiveToSend(receiveBuf, &*sendBuf);
+		}
+	} else if(messageType == MSG_ELECTION_OVER){
+		**mode = MODE_SLAVE;
+
+		printf("we are the slave\n");
+		copyReceiveToSend(receiveBuf, &*sendBuf);
 	}
 
 	return 0;

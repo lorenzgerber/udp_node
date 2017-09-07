@@ -18,8 +18,10 @@ pthread_mutex_t mtx_lock;
 
 int main(int argc, char **argv) {
 
+    //host *thisHost;
     host *thisHost;
     host *nextHost;
+    dataContainer *dataTransfer;
     struct addrinfo *res;
 
 
@@ -33,6 +35,7 @@ int main(int argc, char **argv) {
     int finished = 1;
     int send_socket = -1;
 
+    // sanitize user input
     if (argc != 4) {
         printWrongParams(argv[0]);
         return EXIT_FAILURE;
@@ -41,23 +44,28 @@ int main(int argc, char **argv) {
     // initialize lock
     pthread_mutex_init(&mtx_lock, NULL);
 
-    // set host struct of our host
-    thisHost = malloc(sizeof(host));
-    thisHost->name = getCurrentHostName();
-    thisHost->port = getIntFromStr(argv[1]);
-    thisHost->finished = &finished;
-    thisHost->sendBuffer = &sendBuffer;
-    thisHost->gotMessage = &gotMessage;
-    thisHost->mode = &mode;
 
     // set host struct of send-to host
     nextHost = malloc(sizeof(host));
     nextHost->name = argv[2];
     nextHost->port = getIntFromStr(argv[3]);
 
+    // set host struct of this host
+    thisHost = malloc(sizeof(host));
+    thisHost->name = getCurrentHostName();
+    thisHost->port = getIntFromStr(argv[1]);
+
+    // prepare data to be transered to receiver thread
+    dataTransfer = malloc(sizeof(dataContainer));
+    dataTransfer->host = &thisHost;
+    dataTransfer->finished = &finished;
+    dataTransfer->sendBuffer = &sendBuffer;
+    dataTransfer->gotMessage = &gotMessage;
+    dataTransfer->mode = &mode;
+
     // Create receiver communication thread
     pthread_t listenerThread;
-    if (pthread_create(&listenerThread, NULL, &receiver_init, thisHost) < 0) {
+    if (pthread_create(&listenerThread, NULL, &receiver_init, dataTransfer) < 0) {
         perror("Error creating listener-thread");
         return EXIT_FAILURE;
     }
@@ -79,15 +87,17 @@ int main(int argc, char **argv) {
     // send first message
     send_message(send_socket, res, sendBuffer);
 
+    //got message, has to be 'yes' from start so that
+    // receiver is blocked until we have sent first message
+    // to not mess up the sendBuffer.
     pthread_mutex_lock(&mtx_lock);
 	*gotMessage = NO_MESSAGE;
 	pthread_mutex_unlock(&mtx_lock);
 
     // send loop as long as receiver is alive
-    while(thisHost->finished){
+    while(dataTransfer->finished){
 
     	if(*gotMessage == NEW_MESSAGE){
-
 
 			if (*mode == MODE_ELECTION){
 				send_message(send_socket, res, sendBuffer);
@@ -103,7 +113,14 @@ int main(int argc, char **argv) {
     	}
     }
 
+
     pthread_join(listenerThread, NULL);
+
+
+    // clean up
+    free(dataTransfer);
+    free(thisHost);
+    free(nextHost);
 
     fprintf(stderr, "Exit-message received, goodbye!\n");
     return EXIT_SUCCESS;
