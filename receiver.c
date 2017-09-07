@@ -94,21 +94,21 @@ void receiver_listenTCP(host *ht, int sfd){
     int c;
     int exitLoop = 0;
 
-    char * messageId = (char*) calloc(100, sizeof(char));
+    //char * messageId = (char*) calloc(100, sizeof(char));
 
-    int messageType;
-    int newMessage = NEW_MESSAGE;
+    //int messageType;
+    int newMessage = 1;
 
-    int election = MODE_ELECTION;
-	int electionOver = MODE_ELECTION_OVER;
-	int master = MODE_MASTER;
-	int slave = MODE_SLAVE;
+    //int election = 1;MODE_ELECTION;
+	//int electionOver = 2; MODE_ELECTION_OVER;
+	int master = 3;
+	//int slave = 4; MODE_SLAVE;
 
 	// timing
 	int statCounter = 0;
 	clock_t begin;
 	clock_t end;
-	double timeSpent;
+	double timeSpent = 0;
 
 
     listen(sfd, 1);
@@ -135,6 +135,7 @@ void receiver_listenTCP(host *ht, int sfd){
         while (!exitLoop) {
 
 
+
         	// TCP Reader, to read buffer
             nread = recv(client_sock, receiveBuffer, bufSize, 0);
             if(nread == -1)
@@ -150,15 +151,19 @@ void receiver_listenTCP(host *ht, int sfd){
             // Don't start processing before the last message
 			// has been sent (otherwise you write over the send
 			// buffer.
+
+
             int waitSend = 1;
 			while (waitSend){
-				if(**ht->gotMessage != NEW_MESSAGE){
+				if(**ht->gotMessage != 1){
 					waitSend = 0;
 				}
 			}
 			waitSend = 1;
 
 
+
+			/*
 
             // Here have to implement interpreting the incoming message.
             messageType = checkMessageType(receiveBuffer);
@@ -228,10 +233,46 @@ void receiver_listenTCP(host *ht, int sfd){
 					}
 				}
             }
+
+            */
+
+			// Chang & Roberts Algo
+            processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode);
+
+
+            printf("%s", *ht->sendBuffer);
+            printf("%s", receiveBuffer);
+            printf("%d\n", **ht->mode);
+
+            //pthread_mutex_lock(&mtx_lock);
+
+			//pthread_mutex_unlock(&mtx_lock);
+
+
+
+
+
+			//Timing
+			if(**ht->mode == master){
+				if (statCounter == 0){
+					begin = clock();
+					statCounter++;
+				} else if (statCounter == 10000){
+					end = clock();
+					timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+					printf("time per 10000 RT's %f\n", timeSpent);
+					statCounter = 0;
+				} else {
+					statCounter++;
+				}
+			}
+
+			*ht->gotMessage = &newMessage;
+
         }
 
         free(receiveBuffer);
-        free(messageId);
+        //free(messageId);
         shutdown(client_sock, SHUT_RDWR);
         close(client_sock);
     }
