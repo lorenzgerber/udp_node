@@ -26,6 +26,14 @@
 #define BUF_SIZE 100
 #define NI_MAXHOST 1025
 #define NI_MAXSERV 32
+#define MSG_ELECTION 8
+#define MSG_ELECTION_OVER 13
+#define MSG_CONTENT 7
+#define MODE_ELECTION 1
+#define MODE_ELECTION_OVER 2
+#define MODE_MASTER 3
+#define MODE_SLAVE 4
+#define NEW_MESSAGE 1
 #ifndef __RECEIVER
 #define __RECEIVER
 

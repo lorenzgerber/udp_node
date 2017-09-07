@@ -25,7 +25,6 @@ void *receiver_init(void *arg) {
     struct addrinfo hints, *result, *rp;
 
 
-
     pthread_cleanup_push(cleanup, ht);
 
     char *listeningPort = calloc(sizeof(char),16);
@@ -98,12 +97,12 @@ void receiver_listenTCP(host *ht, int sfd){
     char * messageId = (char*) calloc(100, sizeof(char));
 
     int messageType;
-    int newMessage = 1;
+    int newMessage = NEW_MESSAGE;
 
-    int election = 1;
-	int electionOver = 2;
-	int master = 3;
-	int slave = 4;
+    int election = MODE_ELECTION;
+	int electionOver = MODE_ELECTION_OVER;
+	int master = MODE_MASTER;
+	int slave = MODE_SLAVE;
 
 	// timing
 	int statCounter = 0;
@@ -135,19 +134,11 @@ void receiver_listenTCP(host *ht, int sfd){
 
         while (!exitLoop) {
 
-        	int waitSend = 1;
-        	while (waitSend){
-        		if(**ht->gotMessage != newMessage){
-        			waitSend = 0;
-        		}
-        	}
-        	waitSend = 1;
 
-
+        	// TCP Reader, to read buffer
             nread = recv(client_sock, receiveBuffer, bufSize, 0);
             if(nread == -1)
                 continue;
-
 
             if(nread == 0){
                 fprintf(stderr, "Receiver - Client disconnected\n");
@@ -156,12 +147,25 @@ void receiver_listenTCP(host *ht, int sfd){
                 break;
             }
 
+            // Don't start processing before the last message
+			// has been sent (otherwise you write over the send
+			// buffer.
+            int waitSend = 1;
+			while (waitSend){
+				if(**ht->gotMessage != NEW_MESSAGE){
+					waitSend = 0;
+				}
+			}
+			waitSend = 1;
+
+
+
             // Here have to implement interpreting the incoming message.
             messageType = checkMessageType(receiveBuffer);
 
 
             if(**ht->mode == election){
-            	if (messageType == 8){
+            	if (messageType == MSG_ELECTION){
 					//char* messageId = getMessageId(receiveBuffer, 8);
 					getMessageId2(receiveBuffer, 8, &messageId);
 
@@ -174,7 +178,7 @@ void receiver_listenTCP(host *ht, int sfd){
 					if (result < 0){
 						copyReceiveToSend(&receiveBuffer, ht->sendBuffer);
 					}
-				} else if(messageType == 13){
+				} else if(messageType == MSG_ELECTION_OVER){
 					*ht->mode = &slave;
 
 					printf("we are the slave\n");
@@ -184,8 +188,8 @@ void receiver_listenTCP(host *ht, int sfd){
 				*ht->gotMessage = &newMessage;
 
 
-            } else if(**ht->mode == electionOver){
-            	if(messageType == 13){
+            } else if(**ht->mode == MODE_ELECTION_OVER){
+            	if(messageType == MSG_ELECTION_OVER){
             		createContentMessage(&*ht->sendBuffer);
             		*ht->mode = &master;
 
@@ -193,8 +197,8 @@ void receiver_listenTCP(host *ht, int sfd){
             		*ht->gotMessage = &newMessage;
             		pthread_mutex_unlock(&mtx_lock);
             	}
-            } else if (**ht->mode == slave){
-            	if(messageType == 7){
+            } else if (**ht->mode == MODE_SLAVE){
+            	if(messageType == MSG_CONTENT){
             		createContentMessage(&*ht->sendBuffer);
 
             		pthread_mutex_lock(&mtx_lock);
@@ -202,8 +206,8 @@ void receiver_listenTCP(host *ht, int sfd){
 					pthread_mutex_unlock(&mtx_lock);
 
             	}
-            } else if (**ht->mode == master){
-            	if(messageType == 7){
+            } else if (**ht->mode == MODE_MASTER){
+            	if(messageType == MSG_CONTENT){
 					createContentMessage(&*ht->sendBuffer);
 
 					pthread_mutex_lock(&mtx_lock);
@@ -224,9 +228,8 @@ void receiver_listenTCP(host *ht, int sfd){
 					}
 				}
             }
-            //printf("%s", *ht->sendBuffer);
-
         }
+
         free(receiveBuffer);
         free(messageId);
         shutdown(client_sock, SHUT_RDWR);
