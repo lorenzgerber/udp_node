@@ -5,7 +5,14 @@
  *
  *
  */
- 
+
+#define MODE_ELECTION 1
+#define MODE_ELECTION_OVER 2
+#define MODE_MASTER 3
+#define MODE_SLAVE 4
+#define NO_MESSAGE 0
+#define NEW_MESSAGE 1
+
 #include "node.h"
 pthread_mutex_t mtx_lock;
 
@@ -15,26 +22,16 @@ int main(int argc, char **argv) {
     host *nextHost;
     struct addrinfo *res;
 
-    // one time allocation
+
     char* sendBuffer = (char*) calloc(100, sizeof(char));
 
-
     int election = 1;
-    int electionOver = 2;
-    int master = 3;
-    int slave = 4;
     int *mode = &election;
-
-    // variables to synchronize read/send of messages
-    int noMessage = 0;
     int newMessage = 1;
     int *gotMessage = &newMessage;
 
-
-
     int finished = 1;
     int send_socket = -1;
-
 
     if (argc != 4) {
         printWrongParams(argv[0]);
@@ -58,7 +55,6 @@ int main(int argc, char **argv) {
     nextHost->name = argv[2];
     nextHost->port = getIntFromStr(argv[3]);
 
-
     // Create receiver communication thread
     pthread_t listenerThread;
     if (pthread_create(&listenerThread, NULL, &receiver_init, thisHost) < 0) {
@@ -73,8 +69,6 @@ int main(int argc, char **argv) {
     int connected = -1;
     createElectionMessage(argv[1], &sendBuffer);
 
-
-
     // try to connect
     while(connected < 0){
     	connected = connect_to_server(send_socket, nextHost, res);
@@ -86,34 +80,26 @@ int main(int argc, char **argv) {
     send_message(send_socket, res, sendBuffer);
 
     pthread_mutex_lock(&mtx_lock);
-	gotMessage = &noMessage;
+	*gotMessage = NO_MESSAGE;
 	pthread_mutex_unlock(&mtx_lock);
-
-
-
 
     // send loop as long as receiver is alive
     while(thisHost->finished){
 
-
-    	// only send new message when you got one
-    	if(*gotMessage == newMessage){
+    	if(*gotMessage == NEW_MESSAGE){
 
 
-			if (*mode == election){
+			if (*mode == MODE_ELECTION){
 				send_message(send_socket, res, sendBuffer);
-			} else if (*mode == electionOver){
+			} else if (*mode == MODE_ELECTION_OVER){
 				send_message(send_socket, res, sendBuffer);
-			} else if (*mode == master || *mode == slave){
+			} else if (*mode == MODE_MASTER || *mode == MODE_SLAVE){
 				send_message(send_socket, res, sendBuffer);
 			}
 
-
 			pthread_mutex_lock(&mtx_lock);
-			gotMessage = &noMessage;
+			*gotMessage = NO_MESSAGE;
 			pthread_mutex_unlock(&mtx_lock);
-
-
     	}
     }
 
@@ -122,8 +108,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Exit-message received, goodbye!\n");
     return EXIT_SUCCESS;
 }
-
-
 
 void printWrongParams(char *progName) {
     fprintf(stderr,
@@ -150,7 +134,6 @@ int* getIntFromStr(char *givenStr) {
     *fixedInt = p;
     return fixedInt;
 }
-
 
 /* Will allocate a string and set the current hostname.
  * @return  current hostname.

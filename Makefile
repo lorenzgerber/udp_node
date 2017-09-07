@@ -1,6 +1,6 @@
 # Makefile
 CC=gcc
-CFLAGS= -Wall -std=c99 -pedantic -g -pthread
+CFLAGS= -Wall -std=c99 -Werror -g -pthread
 
 all: node
 

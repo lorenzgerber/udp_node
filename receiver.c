@@ -5,6 +5,15 @@
  *
  *
  */
+#define MSG_ELECTION 8
+#define MSG_ELECTION_OVER 13
+#define MSG_CONTENT 7
+#define MODE_ELECTION 1
+#define MODE_ELECTION_OVER 2
+#define MODE_MASTER 3
+#define MODE_SLAVE 4
+#define NEW_MESSAGE 1
+
 #include "receiver.h"
 
 
@@ -94,22 +103,11 @@ void receiver_listenTCP(host *ht, int sfd){
     int c;
     int exitLoop = 0;
 
-    //char * messageId = (char*) calloc(100, sizeof(char));
-
-    //int messageType;
-    int newMessage = 1;
-
-    //int election = 1;MODE_ELECTION;
-	//int electionOver = 2; MODE_ELECTION_OVER;
-	int master = 3;
-	//int slave = 4; MODE_SLAVE;
-
 	// timing
 	int statCounter = 0;
 	clock_t begin;
 	clock_t end;
 	double timeSpent = 0;
-
 
     listen(sfd, 3);
 
@@ -131,12 +129,7 @@ void receiver_listenTCP(host *ht, int sfd){
 
         char *receiveBuffer = calloc(1, bufSize);
 
-
         while (!exitLoop) {
-
-
-
-
 
         	// TCP Reader, to read buffer
             nread = recv(client_sock, receiveBuffer, bufSize, 0);
@@ -155,33 +148,18 @@ void receiver_listenTCP(host *ht, int sfd){
 				if(**ht->gotMessage != 1){
 					waitSend = 0;
 				}
-				//printf("waiting\n");
 			}
 			waitSend = 1;
-
-
-
-
-
 
 			// Chang & Roberts Algo
             processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode, port);
 
-            //sleep(1);
-            //printf("%s", *ht->sendBuffer);
-            //printf("%s", receiveBuffer);
-            //printf("after %d\n", **ht->mode);
-
             pthread_mutex_lock(&mtx_lock);
-            *ht->gotMessage = &newMessage;
+            **ht->gotMessage = NEW_MESSAGE;
 			pthread_mutex_unlock(&mtx_lock);
 
-
-
-
-
 			//Timing
-			if(**ht->mode == master){
+			if(**ht->mode == MODE_MASTER){
 				if (statCounter == 0){
 					begin = clock();
 					statCounter++;
@@ -194,13 +172,9 @@ void receiver_listenTCP(host *ht, int sfd){
 					statCounter++;
 				}
 			}
-
-
-
         }
 
         free(receiveBuffer);
-        //free(messageId);
         shutdown(client_sock, SHUT_RDWR);
         close(client_sock);
     }

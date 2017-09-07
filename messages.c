@@ -15,7 +15,6 @@ int checkMessageType(char* message){
 			break;
 		}
 	}
-
 	return length;
 }
 
@@ -34,9 +33,6 @@ int getMessageId(char* message, int messageType, char** messageId){
 	memcpy(*messageId, &ptr[messageType+1], length-(messageType+1));
 	return 0;
 }
-
-
-
 
 int createElectionMessage(char* listenPort, char** sendBuf){
 	char tmpHost[100];

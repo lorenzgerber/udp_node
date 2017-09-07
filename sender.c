@@ -9,8 +9,6 @@
 #define BUFSIZE 100
 #include "sender.h"
 
-
-
 int setup_send_socket(){
 	int sock;
 	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
@@ -37,13 +35,11 @@ struct addrinfo *get_server_address(host *ht){
 	return res;
 }
 
-
 int connect_to_server(int sock, host *ht, struct addrinfo *res){
 
 	if(connect(sock, (struct sockaddr *)res->ai_addr, res->ai_addrlen) < 0)
 		return -1;
 	return 0;
-
 }
 
 void send_message(int sock, struct addrinfo *res, char* message){
