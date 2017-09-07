@@ -11,7 +11,7 @@
 
 int setup_send_socket(){
 	int sock;
-	if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 		perror("socket");
 	return sock;
 }
@@ -21,7 +21,7 @@ struct addrinfo *get_server_address(host *ht){
 	struct addrinfo hints;
 		memset(&hints, 0, sizeof(struct addrinfo));
 		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_socktype = SOCK_DGRAM;
 		hints.ai_protocol = 0;
 		hints.ai_flags = AI_ADDRCONFIG;
 

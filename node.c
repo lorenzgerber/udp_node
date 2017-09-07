@@ -70,19 +70,14 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
+
     // set up sender
     res = get_server_address(nextHost);
     send_socket = setup_send_socket();
 
-    int connected = -1;
+    //int connected = -1;
     createElectionMessage(argv[1], &sendBuffer);
 
-    // try to connect
-    while(connected < 0){
-    	connected = connect_to_server(send_socket, nextHost, res);
-    	printf("waiting to get send connection\n");
-    	sleep(2);
-    }
 
     // send first message
     send_message(send_socket, res, sendBuffer);
@@ -95,7 +90,7 @@ int main(int argc, char **argv) {
 	pthread_mutex_unlock(&mtx_lock);
 
     // send loop as long as receiver is alive
-    while(dataTransfer->finished){
+    while(1){
 
     	if(*gotMessage == NEW_MESSAGE){
 
