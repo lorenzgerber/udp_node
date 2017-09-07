@@ -11,13 +11,6 @@
 #ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
 #endif
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <string.h>
-#include <unistd.h>
-#include <pthread.h>
 #include "receiver.h"
 #include "messages.h"
 #include "sender.h"

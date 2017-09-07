@@ -10,18 +10,8 @@
 #ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE 700
 #endif
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
 #include <pthread.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netdb.h>
-#include <net/if.h>
-#include <math.h>
 #include "messages.h"
 #include "election.h"
 #include "helper.h"
