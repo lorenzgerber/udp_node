@@ -111,7 +111,7 @@ void receiver_listenTCP(host *ht, int sfd){
 	double timeSpent = 0;
 
 
-    listen(sfd, 1);
+    listen(sfd, 3);
 
     //set our Id
     char port[5];
@@ -136,6 +136,8 @@ void receiver_listenTCP(host *ht, int sfd){
 
 
 
+
+
         	// TCP Reader, to read buffer
             nread = recv(client_sock, receiveBuffer, bufSize, 0);
             if(nread == -1)
@@ -148,105 +150,31 @@ void receiver_listenTCP(host *ht, int sfd){
                 break;
             }
 
-            // Don't start processing before the last message
-			// has been sent (otherwise you write over the send
-			// buffer.
-
-
             int waitSend = 1;
 			while (waitSend){
 				if(**ht->gotMessage != 1){
 					waitSend = 0;
 				}
+				//printf("waiting\n");
 			}
 			waitSend = 1;
 
 
 
-			/*
-
-            // Here have to implement interpreting the incoming message.
-            messageType = checkMessageType(receiveBuffer);
 
 
-            if(**ht->mode == election){
-            	if (messageType == MSG_ELECTION){
-					//char* messageId = getMessageId(receiveBuffer, 8);
-					getMessageId2(receiveBuffer, 8, &messageId);
-
-					int result = strcmp(ourId, messageId);
-					if (result == 0){
-						printf("we are the Elected!\n");
-						*ht->mode = &electionOver;
-
-					}
-					if (result < 0){
-						copyReceiveToSend(&receiveBuffer, ht->sendBuffer);
-					}
-				} else if(messageType == MSG_ELECTION_OVER){
-					*ht->mode = &slave;
-
-					printf("we are the slave\n");
-					copyReceiveToSend(&receiveBuffer, ht->sendBuffer);
-
-				}
-				*ht->gotMessage = &newMessage;
-
-
-            } else if(**ht->mode == MODE_ELECTION_OVER){
-            	if(messageType == MSG_ELECTION_OVER){
-            		createContentMessage(&*ht->sendBuffer);
-            		*ht->mode = &master;
-
-            		pthread_mutex_lock(&mtx_lock);
-            		*ht->gotMessage = &newMessage;
-            		pthread_mutex_unlock(&mtx_lock);
-            	}
-            } else if (**ht->mode == MODE_SLAVE){
-            	if(messageType == MSG_CONTENT){
-            		createContentMessage(&*ht->sendBuffer);
-
-            		pthread_mutex_lock(&mtx_lock);
-					*ht->gotMessage = &newMessage;
-					pthread_mutex_unlock(&mtx_lock);
-
-            	}
-            } else if (**ht->mode == MODE_MASTER){
-            	if(messageType == MSG_CONTENT){
-					createContentMessage(&*ht->sendBuffer);
-
-					pthread_mutex_lock(&mtx_lock);
-					*ht->gotMessage = &newMessage;
-					pthread_mutex_unlock(&mtx_lock);
-
-
-					if (statCounter == 0){
-						begin = clock();
-						statCounter++;
-					} else if (statCounter == 10000){
-						end = clock();
-						timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
-						printf("time per 10000 RT's %f\n", timeSpent);
-						statCounter = 0;
-					} else {
-						statCounter++;
-					}
-				}
-            }
-
-            */
 
 			// Chang & Roberts Algo
-            processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode);
+            processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode, port);
 
+            //sleep(1);
+            //printf("%s", *ht->sendBuffer);
+            //printf("%s", receiveBuffer);
+            //printf("after %d\n", **ht->mode);
 
-            printf("%s", *ht->sendBuffer);
-            printf("%s", receiveBuffer);
-            printf("%d\n", **ht->mode);
-
-            //pthread_mutex_lock(&mtx_lock);
-
-			//pthread_mutex_unlock(&mtx_lock);
+            pthread_mutex_lock(&mtx_lock);
+            *ht->gotMessage = &newMessage;
+			pthread_mutex_unlock(&mtx_lock);
 
 
 
@@ -267,7 +195,7 @@ void receiver_listenTCP(host *ht, int sfd){
 				}
 			}
 
-			*ht->gotMessage = &newMessage;
+
 
         }
 

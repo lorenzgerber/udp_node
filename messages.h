@@ -20,20 +20,18 @@
 
 int checkMessageType(char* message);
 
-char* getMessageId(char* message, int messageType);
-
-int getMessageId2(char* message, int messageType, char** messageId);
+int getMessageId(char* message, int messageType, char** messageId);
 
 //char* createElectionMessage(char* sendPort);
-int createElectionMessage(char* sendPort, char** sendBuff);
+int createElectionMessage(char* listenPort, char** sendBuf);
 
 //char* createElectionOverMessage(char* sendPort);
-int createElectionOverMessage(char* sendPort, char** sendBuff);
+int createElectionOverMessage(char* listenPort, char** sendBuf);
 
 //char* createContentMessage();
 int createContentMessage(char** sendBuf);
 
-int copyReceiveToSend(char** receiveBuff, char** sendBuff);
+int copyReceiveToSend(char** receiveBuf, char** sendBuf);
 
 
 #endif /* MESSAGES_H_ */

@@ -16,29 +16,11 @@ int checkMessageType(char* message){
 		}
 	}
 
-	// currently for debugging
-	//printf("length %d\n", length);
 	return length;
 }
 
-char* getMessageId(char* message, int messageType){
-	int length = 0;
-	char*ptr = message;
 
-	for(int i = messageType+1; i < 100-messageType; i++){
-		if(ptr[i]== '\n'){
-			length = i;
-			break;
-		}
-	}
-
-	char *messageId = calloc(length-(messageType+1), sizeof(char));
-	strncpy(messageId, &ptr[messageType+1], length-(messageType+1));
-
-	return messageId;
-}
-
-int getMessageId2(char* message, int messageType, char** messageId){
+int getMessageId(char* message, int messageType, char** messageId){
 	int length = 0;
 	char*ptr = message;
 
@@ -56,7 +38,7 @@ int getMessageId2(char* message, int messageType, char** messageId){
 
 
 
-int createElectionMessage(char* sendPort, char** sendBuf){
+int createElectionMessage(char* listenPort, char** sendBuf){
 	char tmpHost[100];
 	memset(tmpHost, 0, 100);
 	if(gethostname(tmpHost, 100) != 0){
@@ -67,7 +49,7 @@ int createElectionMessage(char* sendPort, char** sendBuf){
 	strcpy(message, "ELECTION\n");
 	char*ptr = message;
 	strcpy(&ptr[9], tmpHost);
-	strcpy(&ptr[9+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[9+strlen(tmpHost)], listenPort);
 	strcpy(&ptr[13+strlen(tmpHost)],"\n");
 
 	memcpy(*sendBuf, message, 100);
@@ -77,7 +59,7 @@ int createElectionMessage(char* sendPort, char** sendBuf){
 }
 
 
-int createElectionOverMessage(char* sendPort, char**sendBuf){
+int createElectionOverMessage(char* listenPort, char**sendBuf){
 	char tmpHost[100];
 
 	if(gethostname(tmpHost, 100) != 0){
@@ -88,7 +70,7 @@ int createElectionOverMessage(char* sendPort, char**sendBuf){
 	strcpy(message, "ELECTION_OVER\n");
 	char*ptr = message;
 	strcpy(&ptr[14], tmpHost);
-	strcpy(&ptr[14+strlen(tmpHost)], sendPort);
+	strcpy(&ptr[14+strlen(tmpHost)], listenPort);
 	memcpy(*sendBuf, message, 100);
 	free(message);
 

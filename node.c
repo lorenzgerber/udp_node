@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     // variables to synchronize read/send of messages
     int noMessage = 0;
     int newMessage = 1;
-    int *gotMessage = &noMessage;
+    int *gotMessage = &newMessage;
 
 
 
@@ -85,6 +85,10 @@ int main(int argc, char **argv) {
     // send first message
     send_message(send_socket, res, sendBuffer);
 
+    pthread_mutex_lock(&mtx_lock);
+	gotMessage = &noMessage;
+	pthread_mutex_unlock(&mtx_lock);
+
 
 
 
@@ -95,20 +99,19 @@ int main(int argc, char **argv) {
     	// only send new message when you got one
     	if(*gotMessage == newMessage){
 
+
 			if (*mode == election){
 				send_message(send_socket, res, sendBuffer);
 			} else if (*mode == electionOver){
-				createElectionOverMessage(argv[1], &sendBuffer);
 				send_message(send_socket, res, sendBuffer);
 			} else if (*mode == master || *mode == slave){
 				send_message(send_socket, res, sendBuffer);
 			}
 
 
-
-			//pthread_mutex_lock(&mtx_lock);
+			pthread_mutex_lock(&mtx_lock);
 			gotMessage = &noMessage;
-			//pthread_mutex_unlock(&mtx_lock);
+			pthread_mutex_unlock(&mtx_lock);
 
 
     	}
