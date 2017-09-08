@@ -88,9 +88,18 @@ int main(int argc, char **argv) {
     pthread_mutex_lock(&mtx_lock);
 	*gotMessage = NO_MESSAGE;
 	pthread_mutex_unlock(&mtx_lock);
+	//sleep(1);
+
+	// send initiator message until we get a message in
+
+	while(gotMessage==0){
+		send_message(send_socket, res, sendBuffer);
+		sleep(1);
+	}
+
 
     // send loop as long as receiver is alive
-    while(1){
+    while(dataTransfer->finished){
 
     	if(*gotMessage == NEW_MESSAGE){
 

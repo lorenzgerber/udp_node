@@ -34,6 +34,8 @@ void *receiver_init(void *arg) {
 
     struct sockaddr_in addr;//, from;
 	int sock;
+
+
 	sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	memset(&addr, 0, sizeof(addr));
@@ -41,6 +43,8 @@ void *receiver_init(void *arg) {
 	addr.sin_port = htons(*(*ht->host)->port);
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	bind(sock, (struct sockaddr *)&addr, sizeof (addr));
+
+
 
     receiver_listenTCP(ht, sock);
 
@@ -62,6 +66,17 @@ void receiver_listenTCP(dataContainer *ht, int sfd){
     int client_sock;
     int exitLoop = 0;
 
+    int rv;
+
+    fd_set readfds;
+    fcntl(sfd, F_SETFL, O_NONBLOCK);
+    struct timeval tv;
+
+    clock_t timeOutStart;
+    clock_t timeOutCurrent;
+    double timeOutSpent;
+
+
 	int statCounter = 0;
 	clock_t begin;
 	clock_t end;
@@ -74,12 +89,20 @@ void receiver_listenTCP(dataContainer *ht, int sfd){
     while(!exitLoop) {
 
         client_sock = sfd;
-
         char *receiveBuffer = calloc(1, bufSize);
+
+        //Start Timeout clock
+        timeOutStart = clock();
 
         while (!exitLoop) {
 
-            recvfrom(client_sock, receiveBuffer, 100, 0, NULL, NULL);
+        	timeOutCurrent=clock();
+        	timeOutSpent = (double)(timeOutCurrent - timeOutStart) / CLOCKS_PER_SEC;
+        	if(timeOutSpent > 5){
+        		*ht->finished = 0;
+        		exitLoop = 1;
+        		printf("finished\n");
+        	}
 
             int waitSend = 1;
 			while (waitSend){
@@ -89,26 +112,41 @@ void receiver_listenTCP(dataContainer *ht, int sfd){
 			}
 			waitSend = 1;
 
-			// Chang & Roberts Algo
-            processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode, port);
 
-            pthread_mutex_lock(&mtx_lock);
-            **ht->gotMessage = NEW_MESSAGE;
-			pthread_mutex_unlock(&mtx_lock);
+        	FD_ZERO(&readfds);
+			FD_SET(sfd, &readfds);
 
-			//Timing
-			if(**ht->mode == MODE_MASTER){
-				if (statCounter == 0){
-					begin = clock();
-					statCounter++;
-				} else if (statCounter == 10000){
-					end = clock();
-					timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
-					printf("time per 10000 RT's %f\n", timeSpent);
-					statCounter = 0;
-				} else {
-					statCounter++;
+			tv.tv_sec = 0;
+			tv.tv_usec = 0;
+
+			rv = select(sfd + 1, &readfds, NULL, NULL, &tv);
+
+			if(rv==1){
+				recvfrom(client_sock, receiveBuffer, 100, 0, NULL, NULL);
+
+				// Chang & Roberts Algo
+				processMessage(ourId, &receiveBuffer, ht->sendBuffer, ht->mode, port);
+
+				pthread_mutex_lock(&mtx_lock);
+				**ht->gotMessage = NEW_MESSAGE;
+				pthread_mutex_unlock(&mtx_lock);
+				timeOutStart = clock();
+
+				//Timing
+				if(**ht->mode == MODE_MASTER){
+					if (statCounter == 0){
+						begin = clock();
+						statCounter++;
+					} else if (statCounter == 10000){
+						end = clock();
+						timeSpent = (double)(end - begin) / CLOCKS_PER_SEC;
+						printf("time per 10000 RT's %f\n", timeSpent);
+						statCounter = 0;
+					} else {
+						statCounter++;
+					}
 				}
+
 			}
         }
 
